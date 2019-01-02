@@ -12,7 +12,7 @@ ts.open = function(name, rw)
       end
       
       qw.writeLine = function(string)
-        
+        table[name] = table[name].."\n"..string
       end
       return qw
     elseif rw == "w"
