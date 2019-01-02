@@ -1,1 +1,26 @@
-test
+ts = {}
+function rewritetable()
+  local fstabl
+end
+ts.open = function(name, rw)
+  if (name and rw) then
+    if rw == "a" then
+      qw = {}
+      
+      qw.write = function(string)
+        table[name] = table[name]..string
+      end
+      
+      qw.writeLine = function(string)
+        
+      end
+      return qw
+    elseif rw == "w"
+      
+    elseif rw == "r"
+      
+    end
+  end
+end
+
+ts.
