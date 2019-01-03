@@ -1,26 +1,129 @@
 ts = {}
-function rewritetable()
-  local fstabl
+local tape = peripheral.find("tape_drive")
+function cleartable
+  local fstable
 end
+
+local function rewind()
+  print("Rewound tape")
+  tape.seek(-tape.getSize())
+end
+
+local function get_byte(num, byte)
+    return bit.band(bit.brshift(num, byte * 8), 0xFF)
+end
+ 
+local function from_bytes(b)
+    local n = 0
+    for ix, byte in pairs(b) do
+        n = bit.bor(n, bit.blshift(byte, (ix - 1) * 8))
+    end
+    return n
+end
+ 
+
+local function wipe()
+  if not confirm("Are you sure you want to wipe this tape?") then return end
+  local k = tape.getSize()
+  tape.stop()
+  tape.seek(-k)
+  tape.stop() --Just making sure
+  tape.seek(-90000)
+  local s = string.rep("\xAA", 8192)
+  for i = 1, k + 8191, 8192 do
+    tape.write(s)
+  end
+  tape.seek(-k)
+  tape.seek(-90000)
+  print("Done.")
+end
+
+ts.init = function()
+  local data_length = from_bytes {tape.read(), tape.read(), tape.read(), tape.read()}
+  local data_remaining = data_length
+  local data = ""
+ repeat
+    local block = tape.read(256)
+    block = block:sub(1, data_remaining)
+    data_remaining = data_remaining - #block
+    data = data .. block -- for some reason, only 256 chars at once can be read?
+    sleep()
+ until data_remaining == 0
+ fstable = textutils.unserialize(data)
+end
+
+ts.refresh = function(fstable)
+  t = {}
+  local serialized = textutils.serialize(fstable)
+  length = string.len(serialized)
+  length = tostring(length)
+  wipe()
+  wait(0.1)
+  tape.seek(-math.huge)
+  tape.write(get_byte(#str, 0))
+  tape.write(get_byte(#str, 1))
+  tape.write(get_byte(#str, 2))
+  tape.write(get_byte(#str, 3))
+  tape.write(length)
+end
+
 ts.open = function(name, rw)
   if (name and rw) then
     if rw == "a" then
       qw = {}
       
       qw.write = function(string)
-        table[name] = table[name]..string
+        fstable[name] = fstable[name]..string
       end
       
       qw.writeLine = function(string)
-        table[name] = table[name].."\n"..string
+        fstable[name] = fstable[name].."\n"..string
+      end
+      
+      qw.close = function()
+        refresh(fstables)
+        qw = nil
+      end
+      
+      qw.flush = function()
+        refresh(fstables)
       end
       return qw
     elseif rw == "w"
+      qw = {}
+      fstable[name] = ""
+      qw.write = function(string)
+        fstable[name] = fstable[name]..string
+      end
+      
+      qw.writeLine = function(string)
+        fstable[name] = fstable[name].."\n"..string
+      end
+      
+      qw.close = function()
+        refresh(fstables)
+        qw = nil
+      end
+      
+      qw.flush = function()
+        refresh(fstables)
+      end
+      return qw
       
     elseif rw == "r"
+      qw = {}
+      qw.readAll = function()
+        return fstable[name]
+      end
       
+      qw.close = function()
+        refresh(fstables)
+        qw = nil
+      end
+      
+      return qw
     end
   end
 end
 
-ts.
+return ts
