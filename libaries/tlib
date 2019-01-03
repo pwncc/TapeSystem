@@ -51,13 +51,28 @@ ts.init = function()
  fstable = textutils.unserialize(data)
 end
 
+refresh = function(fstable)
+  t = {}
+  local serialized = textutils.serialize(fstable)
+  length = string.len(serialized)
+  length = tostring(length)
+  wipe()
+  sleep(0.1)
+  tape.seek(-math.huge)
+  tape.write(get_byte(#str, 0))
+  tape.write(get_byte(#str, 1))
+  tape.write(get_byte(#str, 2))
+  tape.write(get_byte(#str, 3))
+  tape.write(length)
+end
+
 ts.refresh = function(fstable)
   t = {}
   local serialized = textutils.serialize(fstable)
   length = string.len(serialized)
   length = tostring(length)
   wipe()
-  wait(0.1)
+  sleep(0.1)
   tape.seek(-math.huge)
   tape.write(get_byte(#str, 0))
   tape.write(get_byte(#str, 1))
