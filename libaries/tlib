@@ -1,10 +1,11 @@
 ts = {}
 local tape = peripheral.find("tape_drive")
+fstable = {}
 function cleartable()
-  local fstable = {}
+  fstable = {}
 end
 
-local function rewind()
+function rewind()
   print("Rewound tape")
   tape.seek(-tape.getSize())
 end
@@ -66,7 +67,7 @@ ts.refresh = function(fstable)
 end
 
 ts.open = function(name, rw)
-  if (name and rw) then
+  if name ~= nil and rw ~= nil then
     if rw == "a" then
       qw = {}
       
