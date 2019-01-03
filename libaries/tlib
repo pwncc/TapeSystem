@@ -38,6 +38,8 @@ function wipe()
 end
 
 ts.init = function()
+  rewind()
+  cleartable()
   local data_length = from_bytes {tape.read(), tape.read(), tape.read(), tape.read()}
   local data_remaining = data_length
   local data = ""
@@ -49,7 +51,12 @@ ts.init = function()
     sleep()
  until data_remaining == 0
  fstable = textutils.unserialize(data)
+ return fstable, data
 end
+
+cleartable()
+rewind()
+ts.init()
 
 refresh = function(fstable)
   t = {}
@@ -59,11 +66,11 @@ refresh = function(fstable)
   wipe()
   sleep(0.1)
   tape.seek(-math.huge)
-  tape.write(get_byte(#length, 0))
-  tape.write(get_byte(#length, 1))
-  tape.write(get_byte(#length, 2))
-  tape.write(get_byte(#length, 3))
-  tape.write(length)
+  tape.write(get_byte(#serialized, 0))
+  tape.write(get_byte(#serialized, 1))
+  tape.write(get_byte(#serialized, 2))
+  tape.write(get_byte(#serialized, 3))
+  return tape.write(serialized)
 end
 
 ts.refresh = function(fstable)
